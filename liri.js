@@ -1,18 +1,81 @@
-// fs is a core Node package for reading and writing files
-var fs = require("fs");
 
-// call on request npm
-var request = require("request");
 
-// Read to see if an argument is given from command line.  If it exist, assign it to a variable.
-if (process.argv[2]) {
-   var liriArg = process.argv[2];
-} else {
+
+//================= start of storing arguments into variables section ============================
+
+// initialize liriInstruction and argument argName variable for either Song Name or Movie Name.
+var liriInstruction = "";
+var argName = "";
+
+var totalArg = process.argv.length;
+// validate if there are enough arguments.
+
+if (totalArg < 3){
 	console.log("Need argument: my-tweets, spotify-this-song '<song>', movie-this '<movie>', or do-what-it-says.");
 	process.exit();
 };
 
-switch (liriArg) {
+// we first assign the instruction in temporary variable to be used for the following case section.
+var liriTemp = process.argv[2];
+
+// Now, we assign arguments to more permanent valiables.  Instructions to liriInstruction and arguments in argName variable.
+
+switch (liriTemp) {
+    case "do-what-it-says":
+		// fs is a core Node package for reading and writing files
+		var fs = require("fs");
+		// This block of code will read from the "random.txt" file.
+		// It's important to include the "utf8" parameter or the code will provide stream data (garbage)
+		// The code will store the contents of the reading inside the variable "data"
+		fs.readFile("random.txt", "utf8", function(error, data) {
+		// If the code experiences any errors it will log the error to the console.
+			if (error) {
+				return console.log(error);
+  			}
+			// We will then print the contents of data
+  			//console.log(data);
+  			// Then split it by commas (to make it more readable)
+  			var dataArr = data.split(",");
+  			// We will then put them in the variables liriCommand and argName for later use.
+  			//console.log("dataArr[0]: " +dataArr[0]);
+  			//console.log("dataArr[1]: " + dataArr[1]);
+  	
+  			liriInstruction = dataArr[0];
+			argName = dataArr[1];
+
+			console.log("liriInstruction from random.txt: " + liriInstruction);
+			console.log("argName combined from from random.txt: " + argName);
+		});
+
+		break;
+    default: 	
+		//now this condition is to manage other liri commands.  
+		// here we also test if there is more than 3 arguments. 
+		// Example, if the command line is: node liri.js spotify-this-song Material Girl, argName should store "Material Girl" string.
+		liriInstruction = process.argv[2];
+
+		var totalArg = process.argv.length;
+
+		// following code concatinates the arguments after the liriInstruction
+		//console.log("Total Arguments: " + totalArg);
+
+		if (totalArg > 4) {
+ 			console.log("Entered array pushing;");
+  			for (var i=3; i<totalArg; i++){
+				argName = argName.concat(process.argv[i] + " ");
+			};
+		} else {
+ 			argName = process.argv[3];
+ 		};
+		console.log("liriInstruction from default: " + liriInstruction);
+		console.log("argName combined from default: " + argName); 		
+	};
+// From here, we have completed putting the variables into 2 variables... liriInstruction and argName (Song Name or Movie Name).
+
+//================= end of storing arguments into variables section ==============================
+
+
+switch (liriInstruction) {
     case "my-tweets":
     	// grab the variables from keys.js file.
 		var Keys = require("./keys.js");
@@ -55,8 +118,8 @@ switch (liriArg) {
     	});
 
     	// if a song name is given, store it in a variable called "songName".
-    	if (process.argv[3]) {
-   			var songName = process.argv[3];
+    	if (argName) {
+   			var songName = argName;
    		} else {
    			var songName = "The Sign";
    		};
@@ -94,9 +157,11 @@ switch (liriArg) {
 		});
         break; 
     case "movie-this":
+    	// call on request npm
+		var request = require("request");
     	// if a movie name is given, store it in a variable called "movieName".
-    	if (process.argv[3]) {
-   			var movieName = process.argv[3];
+    	if (argName) {
+    	   			var movieName = argName;
    		} else {
    			var movieName = "Mr. Nobody";
    		};
@@ -120,42 +185,31 @@ switch (liriArg) {
 		});
 //    	http://www.omdbapi.com/?t=scream&y=&plot=short&apikey=40e9cece
         break;      
-    case "do-what-it-says":
+  //   case "do-what-it-says":
 
-		// fs is a core Node package for reading and writing files
-		var fs = require("fs");
-		// This block of code will read from the "movies.txt" file.
-		// It's important to include the "utf8" parameter or the code will provide stream data (garbage)
-		// The code will store the contents of the reading inside the variable "data"
-		fs.readFile("random.txt", "utf8", function(error, data) {
-		// If the code experiences any errors it will log the error to the console.
-		if (error) {
-			return console.log(error);
-  		}
-		// We will then print the contents of data
-  		//console.log(data);
-  		// Then split it by commas (to make it more readable)
-  		var dataArr = data.split(",");
-  		// We will then display the content as an array for later use.
-  		console.log(dataArr[0]);
-  		console.log(dataArr[1]);
-		});
+  // 	Problem with asynchronous wherein fs.readFile is read only after the last line of code below runs.
 
-        break;
+		// // fs is a core Node package for reading and writing files
+		// var fs = require("fs");
+		// // This block of code will read from the "random.txt" file.
+		// // It's important to include the "utf8" parameter or the code will provide stream data (garbage)
+		// // The code will store the contents of the reading inside the variable "data"
+		// fs.readFile("random.txt", "utf8", function(error, data) {
+		// // If the code experiences any errors it will log the error to the console.
+		// if (error) {
+		// 	return console.log(error);
+  // 		}
+		// // We will then print the contents of data
+  // 		//console.log(data);
+  // 		// Then split it by commas (to make it more readable)
+  // 		var dataArr = data.split(",");
+  // 		// We will then display the content as an array for later use.
+  // 		console.log(dataArr[0]);
+  // 		console.log(dataArr[1]);
+		// });
+
+  //       break;
     default: 
         console.log("Valid arguments are: my-tweets, spotify-this-song '<song>', movie-this '<movie>', or do-what-it-says."); ;
 };
 
-
-
-  //   	fs.appendFile("bank.txt", ", " + amount, function(err) {
-  // 		// If an error was experienced we say it.
-  // 		if (err) {
-  //   		console.log(err);
-  // 		}
-  // 		// If no error is experienced, we'll log the phrase "Content Added" to our node console.
-		//   else {
-		//   	console.log("gets into deposit else ...")
-		//     getTotal();
-		//   };
-		// });
